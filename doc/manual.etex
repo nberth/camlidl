@@ -481,15 +481,15 @@ assumed.
 \subsection{Arrays}
 
 IDL arrays of characters that carry the "[string]" attribute are mapped
-to the Caml "string" type:
+to the Caml "bytes" type:
 \begin{tableau}{|l|l|}{IDL type \var{ty}}{Caml type \transl{\var{ty}}}
-\entree{"[string] char []"}{"string"}
-\entree{"[string] unsigned char []"}{"string"}
-\entree{"[string] signed char []"}{"string"}
-\entree{"[string] byte []"}{"string"}
+\entree{"[string] char []"}{"bytes"}
+\entree{"[string] unsigned char []"}{"bytes"}
+\entree{"[string] signed char []"}{"bytes"}
+\entree{"[string] byte []"}{"bytes"}
 \end{tableau}
-Caml string values are translated to standard null-terminated C strings.
-Be careful about embedded null characters in the Caml string, which
+Caml bytes values are translated to standard null-terminated C strings.
+Be careful about embedded null characters in the Caml bytes, which
 will be recognized as end of string by C functions.
 
 IDL arrays carrying the "[bigarray]" attribute are translated to Caml
@@ -506,12 +506,12 @@ of arrays.  For instance, "int [][]" becomes "int array array".
 If the "unique" attribute is given, the IDL array is translated to an
 ML option type:
 \begin{alltt}
-        [string,unique] char []  \(\Rightarrow\)  string option
+        [string,unique] char []  \(\Rightarrow\)  bytes option
         [unique] \var{ty} []     \(\Rightarrow\)  \transl{\var{ty}} array option
 \end{alltt}
 As in the case of pointers of kind "unique", the option value is
 "None" for a null C pointer, and "Some("\var{v}")" for a non-null
-C pointer to a C array that translates to the ML string or array \var{v}.
+C pointer to a C array that translates to the ML bytes or array \var{v}.
 
 Conversion between a C array and an ML array proceed element by
 element.  For the conversion from C to ML, the number of elements of

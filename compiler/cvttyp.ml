@@ -180,7 +180,7 @@ let rec out_ml_type oc ty =
       end
   | Type_array(attr, ty) ->
       if attr.is_string
-      then fprintf oc "string"
+      then fprintf oc "bytes"
       else fprintf oc "%a array" out_ml_type ty;
       if attr.maybe_null
       then fprintf oc " option"

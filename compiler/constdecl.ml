@@ -37,7 +37,7 @@ let ml_declaration oc c =
       fprintf oc "%a\n" out_ml_type c.cd_type
   | Type_pointer(_, Type_int((Char | UChar | SChar), _)) |
     Type_array({is_string = true}, _) ->
-      fprintf oc "string\n"
+      fprintf oc "bytes\n"
   | _ ->
       error "unsupported type for constant expression"
 
@@ -73,7 +73,7 @@ let ml_definition oc c =
                  name (int64_val v)
   | Type_pointer(_, Type_int((Char | UChar | SChar), _)) |
     Type_array({is_string = true}, _) ->
-      fprintf oc "let %s = \"%s\"\n\n"
+      fprintf oc "let %s = Bytes.of_string \"%s\"\n\n"
                  name (String.escaped (string_val v))
   | _ ->
       error "unsupported type for constant expression"

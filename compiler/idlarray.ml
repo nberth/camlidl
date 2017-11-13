@@ -36,7 +36,7 @@ let rec no_allocation_type = function
   | Type_pointer(kind, ty) -> kind = Ref && no_allocation_type ty
   | Type_enum _ -> true
   | Type_const ty -> no_allocation_type ty
-  | _ -> false  
+  | _ -> false
 
 (* Translation from an ML array [v] to a C array [c] *)
 
@@ -58,7 +58,7 @@ let array_ml_to_c ml_to_c oc onstack pref attr ty_elt v c =
     end;
     begin match attr.size with
       None -> ()
-    | Some re -> iprintf oc "%a = string_length(%s);\n" 
+    | Some re -> iprintf oc "%a = string_length(%s);\n"
                          Lexpr.output (pref, re) v
     end
   end else begin
@@ -165,7 +165,7 @@ let array_c_to_ml c_to_ml oc pref attr ty_elt c v =
     iprintf oc "}\n";
     (* Pop root if needed *)
     if not (no_allocation_type ty_elt) then begin
-      decrease_indent();    
+      decrease_indent();
       iprintf oc "End_roots()\n"
     end
   end
@@ -198,7 +198,7 @@ let bigarray_ml_to_c oc pref attr ty_elt v c =
     (fun i attr ->
       match attr.size with
         None -> ()
-      | Some re -> iprintf oc "%a = Bigarray_val(%s)->dim[%d];\n" 
+      | Some re -> iprintf oc "%a = Bigarray_val(%s)->dim[%d];\n"
                            Lexpr.output (pref, re) v i)
     0 attr.dims
 
