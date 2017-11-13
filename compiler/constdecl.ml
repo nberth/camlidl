@@ -35,8 +35,11 @@ let ml_declaration oc c =
   match scrape_type c.cd_type with
     Type_int(_, _) as _ty ->
       fprintf oc "%a\n" out_ml_type c.cd_type
-  | Type_pointer(_, Type_int((Char | UChar | SChar), _)) |
-    Type_array({is_string = true}, _) ->
+  | Type_pointer(_, Type_const (Type_int((Char | UChar | SChar), _)))
+  | Type_array({is_string = true}, Type_const _) ->
+      fprintf oc "string\n"
+  | Type_pointer(_, Type_int((Char | UChar | SChar), _))
+  | Type_array({is_string = true}, _)  ->
       fprintf oc "bytes\n"
   | _ ->
       error "unsupported type for constant expression"
@@ -71,9 +74,13 @@ let ml_definition oc c =
   | Type_int(_, I64) ->
       fprintf oc "let %s = Int64.of_string \"%Ld\"\n\n"
                  name (int64_val v)
-  | Type_pointer(_, Type_int((Char | UChar | SChar), _)) |
-    Type_array({is_string = true}, _) ->
+  | Type_pointer(_, Type_const (Type_int((Char | UChar | SChar), _)))
+  | Type_array({is_string = true}, Type_const _) ->
+      fprintf oc "let %s = \"%s\"\n\n"
+        name (String.escaped (string_val v))
+  | Type_pointer(_, Type_int((Char | UChar | SChar), _))
+  | Type_array({is_string = true}, _) ->
       fprintf oc "let %s = Bytes.of_string \"%s\"\n\n"
-                 name (String.escaped (string_val v))
+        name (String.escaped (string_val v))
   | _ ->
       error "unsupported type for constant expression"

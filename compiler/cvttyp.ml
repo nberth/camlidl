@@ -154,6 +154,15 @@ let rec ml_bigarray_kind ty =
 (* Convert an IDL type to an ML type *)
 
 let rec out_ml_type oc ty =
+  let out_str oc = fprintf oc "%s"
+  and out_ptr oc kind = match kind with
+    | Ref -> fprintf oc "%a"
+    | Unique -> fprintf oc "%a option"
+    | Ptr -> fprintf oc "%a Com.opaque"
+    | Ignore -> assert false
+  and out_arr oc attr =
+    kfprintf (fun oc -> if attr.maybe_null then fprintf oc " option") oc "%a"
+  in
   match ty with
     Type_int(Boolean, _) -> output_string oc "bool"
   | Type_int((Char | UChar | SChar), _) -> output_string oc "char"
@@ -171,19 +180,18 @@ let rec out_ml_type oc ty =
   | Type_enum (en, attr) ->
       out_mltype_stamp oc "enum" en.en_mod en.en_name en.en_stamp;
       if attr.bitset then fprintf oc " list"
+  | Type_pointer (kind, Type_const (Type_int ((Char | UChar | SChar), _))) ->
+      out_ptr oc kind out_str "string"
+  | Type_pointer (kind, Type_int ((Char | UChar | SChar), _)) ->
+      out_ptr oc kind out_str "bytes"
   | Type_pointer(kind, ty) ->
-      begin match kind with
-        Ref -> out_ml_type oc ty
-      | Unique -> fprintf oc "%a option" out_ml_type ty
-      | Ptr -> fprintf oc "%a Com.opaque" out_ml_type ty
-      | Ignore -> assert false
-      end
+      out_ptr oc kind out_ml_type ty
+  | Type_array({ is_string = true } as attr, Type_const _) ->
+      out_arr oc attr out_str "string"
+  | Type_array({ is_string = true } as attr, ty) ->
+      out_arr oc attr out_str "bytes"
   | Type_array(attr, ty) ->
-      if attr.is_string
-      then fprintf oc "bytes"
-      else fprintf oc "%a array" out_ml_type ty;
-      if attr.maybe_null
-      then fprintf oc " option"
+      out_arr oc attr (fun oc -> fprintf oc "%a array" out_ml_type) ty
   | Type_bigarray(attr, ty) ->
       let layout =
         if attr.fortran_layout
